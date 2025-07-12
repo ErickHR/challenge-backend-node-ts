@@ -1,0 +1,39 @@
+services: 
+
+  challenge-backend-node-ts:
+    container_name: challenge-backend-node-ts
+    build:
+      context: .
+    user: "node"
+    working_dir: /home/node/app
+    ports:
+      - "9000:${PORT}"
+    volumes:
+      - ".:/home/node/app"
+      - /home/node/app/node_modules
+    command: npm run dev
+    networks:
+      challenge-backend-net:
+        ipv4_address: 182.18.0.2
+
+  challenge-backend-mongo:
+    container_name: challenge-backend-mongo
+    image: mongo:4.4
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./data/mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+
+    networks:
+      challenge-backend-net:
+        ipv4_address: 182.18.0.3
+
+networks:
+  challenge-backend-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 182.18.0.0/16

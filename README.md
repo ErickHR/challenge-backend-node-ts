@@ -64,15 +64,109 @@ server/
 ### 1. Cuentas (DB: `eiAccounts`, colección `accounts`)
 
 - Crear cuenta: `name`, `email`
+
+```
+mutation CreateProdM {
+  createAccM(account: { name: "account 1", email: "account@gmail.com" }) {
+    _id
+    name
+    email
+  }
+}
+```
+
 - Consultar cuenta por ID
+
+```
+query GetByIdAccQ {
+  getByIdAccQ(id: "6872da42aa8300c11612bd8a") {
+    _id
+    name
+    email
+  }
+}
+```
+
 - Listar cuentas con filtro por nombre (paginado)
+
+```
+query GetAccQ {
+  getAccQ(
+    accountDto: {
+      pagination: { page: 1, limit: 10 }
+      filter: { name: "account" }
+    }
+  ) {
+    meta {
+      totalItems
+      totalPage
+      previousPage
+      nextPage
+      currentPage
+    }
+    data {
+      _id
+      name
+      email
+    }
+  }
+}
+```
 
 ### 2. Productos (DB: `eiBusiness`, colección `products`)
 
 - Crear producto: `name`, `sku`, `stock`
-- Consultar producto por ID
-- Listar productos por ID de cuenta (relación manual)
 
+```
+mutation CreateProdM {
+  createProdM(
+    product: { name: "product", sku: "product sku", stock: 2 }
+    accountId: "6872da42aa8300c11612bd8a"
+  ) {
+    _id
+    name
+    sku
+  }
+}
+```
+
+- Consultar producto por ID
+
+```
+query GetByIdProdQ {
+  getByIdProdQ(id: "6872df0f4d57ef2b1d12db48") {
+    _id
+    name
+    sku
+  }
+}
+```
+
+- Listar productos por ID de cuenta (relación manual)
+```
+query GetByIdAccountProdQ {
+  getByIdAccountProdQ(
+    productDto: {
+      filter: { accountId: "6872da42aa8300c11612bd8a" }
+      pagination: { page: 1, limit: 1 }
+    }
+  ) {
+    data {
+      _id
+      name
+      sku
+      stock
+    }
+    meta {
+      totalItems
+      totalPage
+      previousPage
+      nextPage
+      currentPage
+    }
+  }
+}
+```
 ### 3. Simulación de compra
 
 - Mutation: `purchaseProduct(accountId: ID!, productId: ID!, quantity: Int!)`
@@ -81,12 +175,50 @@ server/
   - Valida stock suficiente
   - Resta cantidad del stock y retorna un mensaje de éxito o error
 
+```
+mutation PurchaseProductM {
+  purchaseProductM(
+    purchaseOrderDto: {
+      productId: "6872e176cc3f06e0fa324619"
+      quantity: 2
+      accountId: "6872da42aa8300c11612bd8a"
+    }
+  )
+}
+```
+
 ### 4. BONUS (Odoo)
 
 - Usar `xmlrpc` para consultar información de cliente en Odoo (correo o nombre)
 - Crear una función para crear o editar clientes en Odoo (por ejemplo, `res.partner.create` o `res.partner.write` usando XML-RPC).
 - **No es necesario contar con un entorno Odoo funcional.** Basta con que documentes en código cómo se haría la integración (estructura del método, parámetros esperados, y ejemplo de llamada).
 - Si lo deseas, puedes usar mocks o comentarios explicativos para demostrar tu comprensión.
+
+```
+# para esta solución se tuvo que recurrir a la documentación de ODOO https://www.odoo.com/documentation/18.0/es/developer/reference/external_api.html
+# tambien se ha reviso la documentacion de xmlrpc https://www.npmjs.com/package/xmlrpc
+
+
+  createOdooClient = async (clientDto: IClient) => {
+    return new Promise((resolve, reject) => {
+      client.methodCall(
+        "execute_kw",
+        [
+          db,
+          Number(uid),
+          password,
+          "res.partner",
+          "create",
+          [{ ...clientDto }]
+        ],
+        (err: any, value: any) => {
+          if (err) reject(err);
+          else resolve(value);
+        }
+      );
+    })
+  }
+```
 
 ## 📑 Criterios de evaluación
 

@@ -8,10 +8,12 @@ const productsSchema = new Schema<IProduct>(
   {
     name: { type: String },
     sku: { type: String },
+    stock: { type: Number, default: 0 },
+    accountId: { type: Schema.Types.ObjectId },
   },
   { timestamps: true }
 );
 
-const Accounts = cnxProducts.model<IProduct>("Accounts", productsSchema);
+const Products = cnxProducts.model<IProduct>("Products", productsSchema);
 
-export default Accounts;
+export default Products;

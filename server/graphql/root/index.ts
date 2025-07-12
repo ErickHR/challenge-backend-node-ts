@@ -20,6 +20,19 @@ const rootTypeDefs = gql`
   type Mutation {
     _: String
   }
+
+  input PaginationDto {
+    page: Int
+    limit: Int
+  }
+
+  type MetaResponse {
+    totalItems: Int!
+    totalPage: Int!
+    previousPage: Int
+    nextPage: Int
+    currentPage: Int!
+  }
 `;
 
 export const typeDefs = [rootTypeDefs, accountsSchema, productsSchema];

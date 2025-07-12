@@ -1,9 +1,10 @@
 import * as xmlrpc from "xmlrpc";
 
 import config from '../config/app'
+import { IClient } from "./interface/client";
 
 const {
-    odoo: { url, db, uid, password }
+  odoo: { url, db, uid, password }
 } = config
 
 const client = xmlrpc.createClient({ url });
@@ -29,6 +30,26 @@ class OdooService {
       );
     });
   };
+
+  createOdooClient = async (clientDto: IClient) => {
+    return new Promise((resolve, reject) => {
+      client.methodCall(
+        "execute_kw",
+        [
+          db,
+          Number(uid),
+          password,
+          "res.partner",
+          "create",
+          [{ ...clientDto }]
+        ],
+        (err: any, value: any) => {
+          if (err) reject(err);
+          else resolve(value);
+        }
+      );
+    })
+  }
 }
 
 export default new OdooService();
